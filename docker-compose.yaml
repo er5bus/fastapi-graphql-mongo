@@ -1,0 +1,42 @@
+version: "3.6"
+
+services:
+  app:
+    build:
+      context: .
+    depends_on:
+      - db
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "7000:5000"
+    stdin_open: true
+    tty: true
+
+  db:
+    image: mongo:4.2
+    hostname: mongodb
+    restart: on-failure:5
+    command: mongod --auth
+    ports:
+      - 27017:27017
+    environment:
+      DATABASE_ROOT: ${DATABASE_ROOT}
+      DATABASE_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+    volumes:
+      - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - data_db:/data/db/
+      - data_logs:/var/log/mongodb/
+
+  
+volumes:
+  data_db:
+  data_logs:
